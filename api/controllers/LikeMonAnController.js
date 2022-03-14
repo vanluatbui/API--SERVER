@@ -9,20 +9,27 @@ module.exports = {
 
         let user = req.params.user;
 
-    var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb://localhost:27017/";
-    
-    MongoClient.connect(url, function(err, db) {
-      if (err) throw err;
-      var dbo = db.db("CookingRecipe");
+        var mongoose = require('mongoose');
 
-      var query = { UserName : user.toString() };
-      dbo.collection("UserLikeMonAn").find(query).toArray(function(err, result) {
-        if (err) throw err;
-        res.json(result);
-        db.close();
-      });
-    });
+        //Set up default mongoose connection
+        var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+        mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+        
+        //Get the default connection
+        var db = mongoose.connection;
+        
+        //Bind connection to error event (to get notification of connection errors)
+        db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+        
+        db.once('open', function () {
+        
+          var query = { UserName : user.toString() };
+          db.collection("UserLikeMonAn").find(query).toArray(function(err, result) {
+            if (err) throw err;
+            res.json(result);
+            db.close();
+          });
+        });       
   },
 
 
@@ -32,30 +39,37 @@ module.exports = {
 
     let data = req.body;
 
-var MongoClient = require('mongodb').MongoClient;
-var url = "mongodb://localhost:27017/";
+    var mongoose = require('mongoose');
 
-MongoClient.connect(url, function(err, db) {
-  if (err) throw err;
-  var dbo = db.db("CookingRecipe");
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
 
-  var collection = dbo.collection('UserLikeMonAn');
+//Get the default connection
+var db = mongoose.connection;
 
-  dbo.collection('MonAn').find({TenMonAn : data.MonAn.toString()}).toArray(function(err, result) {
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.once('open', function () {
+
+  var collection = db.collection('UserLikeMonAn');
+
+  db.collection('MonAn').find({TenMonAn : data.MonAn.toString()}).toArray(function(err, result) {
     if (err) throw err;
 
     //data.MonAn = result[0]._id.toString();
 
-collection.insert([data], function (err, result) {
+collection.insertOne(data, function (err, result) {
     if (err) {
    res.json({message: 'That bai!', data : false})
-    } else {
-   res.json({message: 'Thanh cong!', data : true})
-        }
-db.close();
-  });      
+  } else {
+    res.json({message: 'Thanh cong!', data : true})
+         }
+ db.close();
+   });     
+ });   
 });     
-});
   },
 
 
@@ -64,22 +78,30 @@ db.close();
   monanUnLike: (req, res) => {
 
     let data = req.body;
-      
-    var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb://127.0.0.1:27017/";
 
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("CookingRecipe");
-        var myquery = {UserName  : data.UserName, MonAn : data.MonAn };
-      
-        
-        dbo.collection("UserLikeMonAn").deleteOne(myquery, function(err, obj) {
-          if (err) throw err;
-          db.close();
-        });
-  
-       res.json({message: 'Xoá thành công !', data : true})
+    var mongoose = require('mongoose');
+
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+
+//Get the default connection
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.once('open', function () {
+
+  var myquery = {UserName  : data.UserName, MonAn : data.MonAn };
+            
+  db.collection("UserLikeMonAn").deleteOne(myquery, function(err, obj) {
+    if (err) throw err;
+    db.close();
+  });
+
+ res.json({message: 'Xoá thành công !', data : true})
+
 });
   },
 }

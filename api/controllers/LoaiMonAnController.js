@@ -7,16 +7,25 @@ module.exports = {
 
     ds_loaimonan: (req, res) => {
 
-        const mongoClient = require('mongodb').MongoClient;
-       mongoClient.connect('mongodb://127.0.0.1:27017/CookingRecipe', function(err, db) {
-       if (err) throw err;
-       var loaimonan = db.collection('LoaiMonAn');
-        loaimonan.find({}).toArray(function (err,data) {
+      var mongoose = require('mongoose');
 
-        if (err) throw err;
-         res.json(data);
-    });
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+
+//Get the default connection
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.once('open', function () {
+
+  db.collection("LoaiMonAn").find().toArray(function(err, result) {
+    if (err) throw err;
+    res.json(result);
     db.close();
+  });
 });
   },
 
@@ -26,32 +35,30 @@ module.exports = {
 
      let data = req.body;
 
-     //Kết nối CSDL
-     var mongodb = require('mongodb');
-     var MongoClient = mongodb.MongoClient;
-     var url = 'mongodb://localhost:27017/CookingRecipe';
+     var mongoose = require('mongoose');
 
-     MongoClient.connect(url, function (err, db) {
-     if (err) {
-       //Kết nối CSDL thất bại
-        console.log('Unable to connect to the mongoDB server. Error:', err);
-    } 
-    else {
-      //Kết nối CSDL thành công
-        console.log('Connection established to', url);
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
 
-       var collection = db.collection('LoaiMonAn');
+//Get the default connection
+var db = mongoose.connection;
 
-      collection.insert([data], function (err, result) {
-     if (err) {
-         res.json({message: 'That bai!', data : false})
-     } else {
-         res.json({message: 'Thanh cong!', data : true})
-     }
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-     db.close();
-   });
-}
+db.once('open', function () {
+
+  var collection = db.collection('LoaiMonAn');
+
+  collection.insertOne(data, function (err, result) {
+ if (err) {
+     res.json({message: 'That bai!', data : false})
+ } else {
+     res.json({message: 'Thanh cong!', data : true})
+ }
+ db.close();
+ });
 });
    },
 
@@ -63,24 +70,31 @@ module.exports = {
 
     let ID = new require('mongodb').ObjectID(req.params.idLoaiMonAn);
 
-    var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb://127.0.0.1:27017/";
+    var mongoose = require('mongoose');
 
-  MongoClient.connect(url, function(err, db) {
-    if (err) throw err;
-    var dbo = db.db("CookingRecipe");
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
 
-var myquery = { _id : ID };
-var newvalues = { $set: {TenLoaiMonAn : data.TenLoaiMonAn} };
+//Get the default connection
+var db = mongoose.connection;
 
-dbo.collection("LoaiMonAn").updateOne(myquery, newvalues, function(err, res) {
-if (err) 
-throw err;
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
-db.close();
-  });
+db.once('open', function () {
+
+  var myquery = { _id : ID };
+  var newvalues = { $set: {TenLoaiMonAn : data.TenLoaiMonAn} };
   
-  res.json({message: 'Cập nhật thành công !', data : true})
+  db.collection("LoaiMonAn").updateOne(myquery, newvalues, function(err, res) {
+  if (err) 
+  throw err;
+  
+  db.close();
+    });
+    
+    res.json({message: 'Cập nhật thành công !', data : true})
 });
   },
 
@@ -90,21 +104,30 @@ db.close();
 
     let ID = new require('mongodb').ObjectID(req.params.idLoaiMonAn);
 
-    var MongoClient = require('mongodb').MongoClient;
-    var url = "mongodb://127.0.0.1:27017/";
+    var mongoose = require('mongoose');
 
-    MongoClient.connect(url, function(err, db) {
-        if (err) throw err;
-        var dbo = db.db("CookingRecipe");
-        var myquery = { _id : ID };
+//Set up default mongoose connection
+var mongoDB = 'mongodb+srv://vanluat:12345@cluster0.owctn.mongodb.net/CookingRecipe?retryWrites=true&w=majority';
+mongoose.connect(mongoDB, {useNewUrlParser: true, useUnifiedTopology: true});
+
+//Get the default connection
+var db = mongoose.connection;
+
+//Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+
+db.once('open', function () {
+
+  var myquery = { _id : ID };
       
         
-        dbo.collection("LoaiMonAn").deleteOne(myquery, function(err, obj) {
-          if (err) throw err;
-          db.close();
-        });
+  db.collection("LoaiMonAn").deleteOne(myquery, function(err, obj) {
+    if (err) throw err;
+    db.close();
+  });
+
+ res.json({message: 'Xoá thành công !', data : true});
   
-       res.json({message: 'Xoá thành công !', data : true})
 });
   },
 }
